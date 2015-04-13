@@ -1,0 +1,58 @@
+## velib
+##### a way to access data from the Paris bike network
+
+-----
+
+##### Installing the `velib` R Package
+
+```r
+install.packages("devtools")
+require(devtools)
+install_github("brian-bot/velib")
+```
+
+-----
+
+##### Overview
+
+* sign up, get your apiKey, and see API documentation at [JCDecaux](https://developer.jcdecaux.com/#/opendata/vls?page=getstarted)
+* more about [velib in Paris](http://en.velib.paris.fr/)
+
+-----
+
+##### Quickstart Guide
+
+```r
+## LOAD THE PACKAGE
+require(velib)
+
+## USE API KEY TO AUTHENTICATE
+setApiKey("myApiKey12345")
+
+## GET ALL OF THE CONTRACTS
+cs <- velibRestGET('contracts')
+
+## GET VELIB CONTRACT
+idx <- sapply(cs, function(x){
+  x$commercial_name=="Velib"
+})
+velibContract <- cs[[ which(idx) ]]
+
+## GET THE STATIONS FOR THE VELIB CONTRACT
+stns <- velibRestGET(paste0("stations?contract=", velibContract$name))
+stnsNew <- lapply(stns, function(x){
+  x$last_update <- as.POSIXct(x$last_update/1000, origin="1970-01-01")
+  x$position <- paste0(x$position, collapse=":")
+  return(as.data.frame(x))
+})
+
+## CONVERT TO A DATAFRAME AND ONLY LOOK AT OPEN STATIONS
+df <- do.call(rbind, stnsNew)
+df <- df[ df$status=="OPEN", ]
+
+## PLOT AVAILABLE BIKES BY BONUS STATUS
+require(ggplot2)
+densPlot <- ggplot(df, aes(x=available_bikes, fill=factor(bonus))) + 
+  geom_density(alpha=0.3) + 
+  ggtitle("Available Bikes by Bonus Status")
+```

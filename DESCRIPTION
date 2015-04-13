@@ -1,0 +1,10 @@
+Package: velib
+Type: Package
+Title: Velib API
+Version: 0.1
+Date: 2015-04-11
+Author: Brian M. Bot
+Maintainer: Brian M. Bot <brian.bot@sagebase.org>
+Imports: methods,RCurl,RJSONIO
+Description: Allowing access to the Velib APIs
+License: GPL
